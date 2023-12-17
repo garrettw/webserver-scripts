@@ -35,5 +35,9 @@ if [ -n $pwlen ]; then
     sed -i -e "s/pam_unix.so obscure yescrypt/pam_unix.so obscure yescrypt minlen=$pwlen/" /etc/pam.d/common-password
 fi
 
+if [ ! -d /etc/skel/sites ]; then
+    mkdir /etc/skel/sites
+fi
+
 echo -e "\nApache and PHP have been installed. Next, you can add new users using the (sudo) adduser command. Be sure to add them to the sudo and/or sshlogin groups if desired."
 
