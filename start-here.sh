@@ -25,17 +25,15 @@ a2dismod php8.1 mpm_prefork
 a2enmod mpm_event proxy_fcgi headers rewrite
 a2enconf php8.1-fpm
 systemctl restart apache2
-sed "s/FcgidConnectTimeout 20/FcgidConnectTimeout 20\n  AddType application/x-httpd-php .php\n  AddHandler application/x-httpd-php .php/" /etc/apache2/mods-available/fcgid.conf
+sed -i -e "s/FcgidConnectTimeout 20/FcgidConnectTimeout 20\n  AddType application\/x-httpd-php .php\n  AddHandler application\/x-httpd-php .php/" /etc/apache2/mods-available/fcgid.conf
 addgroup sshlogin
 adduser $defaultuser sshlogin
 echo "AllowGroups sshlogin sudo" >> /etc/ssh/sshd_config
 
 read -rp "Add a minimum password length requirement [#/N]? " pwlen
 if [ -n $pwlen ]; then
-    sed "s/pam_unix.so obscure yescrypt/pam_unix.so obscure yescrypt minlen=$pwlen/" /etc/pam.d/common-password
+    sed -i -e "s/pam_unix.so obscure yescrypt/pam_unix.so obscure yescrypt minlen=$pwlen/" /etc/pam.d/common-password
 fi
 
-cp ./new-user-cmds.sh /usr/local/sbin/adduser.local
-
-echo "\nApache and PHP have been installed. Next, you can add new users using the (sudo) adduser command."
+echo -e "\nApache and PHP have been installed. Next, you can add new users using the (sudo) adduser command. Be sure to add them to the sudo and/or sshlogin groups if desired."
 
