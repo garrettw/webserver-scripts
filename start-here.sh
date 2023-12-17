@@ -28,12 +28,14 @@ sudo systemctl restart apache2
 sudo sed "s/FcgidConnectTimeout 20/FcgidConnectTimeout 20\n  AddType application/x-httpd-php .php\n  AddHandler application/x-httpd-php .php/" /etc/apache2/mods-available/fcgid.conf
 sudo addgroup sshlogin
 sudo adduser $defaultuser sshlogin
-sudo echo "AllowGroups sshlogin" >> /etc/ssh/sshd_config
+sudo echo "AllowGroups sshlogin sudo" >> /etc/ssh/sshd_config
 
-read -rp "Do you want to allow SSH login for new users by default [Y/n]?" allowssh
-if [[ $allowssh == Y || $allowssh == y || $allowssh == "" ]]; then
-    sudo echo "EXTRA_GROUPS=\"sshlogin\"\nADD_EXTRA_GROUPS=1" >> /etc/adduser.conf
+read -rp "Add a minimum password length requirement [#/N]?" pwlen
+if [ -n $pwlen ]; then
+    sudo sed "s/pam_unix.so obscure yescrypt/pam_unix.so obscure yescrypt minlen=$pwlen/" /etc/pam.d/common-password
 fi
 
-echo "\nApache and PHP have been installed. Next, run the per-user install script."
+sudo cp ./new-user-cmds.sh /usr/local/sbin/adduser.local
+
+echo "\nApache and PHP have been installed. Next, you can add new users using the (sudo) adduser command."
 
