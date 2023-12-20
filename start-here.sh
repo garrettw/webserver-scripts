@@ -20,7 +20,7 @@ echo
 read -rp "Enter the username of the default user (not root, maybe ubuntu): " defaultuser
 
 apt update && sudo apt upgrade
-apt install apache2 php php-fpm libapache2-mod-fcgid
+apt install apache2 php php-fpm libapache2-mod-fcgid mariadb-client
 a2dismod php8.1 mpm_prefork
 a2enmod mpm_event proxy_fcgi headers rewrite
 a2enconf php8.1-fpm
@@ -30,14 +30,19 @@ addgroup sshlogin
 adduser $defaultuser sshlogin
 echo "AllowGroups sshlogin sudo" >> /etc/ssh/sshd_config
 
-read -rp "Add a minimum password length requirement [#/N]? " pwlen
+read -rp "Set minimum user password length: " pwlen
 if [ -n $pwlen ]; then
     sed -i -e "s/pam_unix.so obscure yescrypt/pam_unix.so obscure yescrypt minlen=$pwlen/" /etc/pam.d/common-password
+fi
+
+read -rp "Set global default MariaDB host: " mysql_host
+if [ -n mysql_host ]; then
+    sed -i -e "s/socket = \/run\/mysqld\/mysqld.sock/# socket = \/run\/mysqld\/mysqld.sock\nhost = $mysql_host\n\n\[client\]\nhost = $mysql_host/" /etc/mysql/mariadb.cnf
 fi
 
 if [ ! -d /etc/skel/sites ]; then
     mkdir /etc/skel/sites
 fi
 
-echo -e "\nApache and PHP have been installed. Next, you can add new users using the (sudo) adduser command. Be sure to add them to the sudo and/or sshlogin groups if desired."
+echo -e "\nApache, PHP, and MariaDB client have been installed. Next, you can add new users using the (sudo) adduser command. Be sure to add them to the sudo and/or sshlogin groups if desired."
 
