@@ -37,8 +37,21 @@ fi
 
 read -rp "Set global default MariaDB host: " mysql_host
 if [ -n mysql_host ]; then
+    echo "MYSQL_HOST=$mysql_host" >> /etc/environment
     sed -i -e "s/socket = \/run\/mysqld\/mysqld.sock/# socket = \/run\/mysqld\/mysqld.sock\nhost = $mysql_host\n\n\[client\]\nhost = $mysql_host/" /etc/mysql/mariadb.cnf
 fi
+
+read -rp "Enter username of MariaDB superuser [root]: " mysql_root_user
+if [ -z mysql_root_user ]; then
+    mysql_root_user=root
+fi
+read -rsp "Enter password of MariaDB superuser: " mysql_root_password
+
+cat << EOF > /root/.my.cnf
+[client]
+user=$mysql_root_user
+password=$mysql_root_password
+EOF
 
 if [ ! -d /etc/skel/sites ]; then
     mkdir /etc/skel/sites
